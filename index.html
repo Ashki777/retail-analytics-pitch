@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Analytics Pitch</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07111f;--bg2:#0d1e33;--bg3:#112540;
+  --blue:#3B9EE8;--mint:#1FD1A0;--gold:#F0B429;--coral:#F06449;
+  --text:#E8F0FA;--muted:#6A8CAF;--border:rgba(59,158,232,0.2);--card:rgba(17,37,64,0.9);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'IBM Plex Sans',sans-serif;color:var(--text);}
+.bg-grid{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 15% 50%,rgba(59,158,232,0.06) 0%,transparent 55%),
+             radial-gradient(ellipse at 85% 10%,rgba(31,209,160,0.04) 0%,transparent 45%),var(--bg);}
+.bg-grid::after{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(59,158,232,0.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(59,158,232,0.05) 1px,transparent 1px);
+  background-size:80px 80px;}
+#deck{position:relative;z-index:1;width:100%;height:100%;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;
+  padding:32px 56px 76px;opacity:0;pointer-events:none;transition:opacity 0.45s ease;overflow:hidden;}
+.slide.active{opacity:1;pointer-events:all;}
+.slide-label{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+h1{font-size:clamp(36px,4.8vw,58px);font-weight:700;line-height:1.1;color:var(--text);}
+h1 em{color:var(--blue);font-style:normal;}
+h2{font-size:clamp(22px,3vw,34px);font-weight:700;line-height:1.15;color:var(--text);margin-bottom:4px;}
+h2 em{color:var(--mint);font-style:normal;}
+h3{font-size:15px;font-weight:600;color:var(--blue);margin-bottom:7px;letter-spacing:.02em;}
+p{font-size:14px;line-height:1.72;color:rgba(232,240,250,0.85);}
+.lead{font-size:17px;line-height:1.7;color:rgba(232,240,250,0.92);}
+strong{font-weight:600;color:var(--text);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.col{display:flex;flex-direction:column;gap:14px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--mint));border-radius:14px 14px 0 0;}
+.card.c-gold::before{background:linear-gradient(90deg,var(--gold),#f57c42);}
+.card.c-mint::before{background:linear-gradient(90deg,var(--mint),var(--blue));}
+.card.c-coral::before{background:linear-gradient(90deg,var(--coral),var(--gold));}
+.stat{text-align:center;}
+.stat .num{font-family:'IBM Plex Mono',monospace;font-size:clamp(30px,4vw,48px);font-weight:600;line-height:1;
+  background:linear-gradient(135deg,var(--blue),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px;display:block;}
+.stat .num.gd{background:linear-gradient(135deg,var(--gold),var(--coral));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat .num.mn{background:linear-gradient(135deg,var(--mint),#1baaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat .lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.stat .sub{font-size:12px;color:rgba(232,240,250,0.6);margin-top:4px;line-height:1.5;}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;}
+.tbl th{background:rgba(59,158,232,0.15);color:var(--blue);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{padding:9px 12px;border-bottom:1px solid rgba(59,158,232,0.07);color:rgba(232,240,250,0.88);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(59,158,232,0.05);}
+.tbl .win{color:var(--mint);font-weight:600;}.tbl .bad{color:var(--coral);font-weight:500;}.tbl .ok{color:var(--gold);font-weight:500;}
+.tbl .hi{background:rgba(31,209,160,0.07);}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.04em;vertical-align:middle;}
+.pill.bl{background:rgba(59,158,232,0.15);color:var(--blue);border:1px solid rgba(59,158,232,0.3);}
+.pill.gn{background:rgba(31,209,160,0.12);color:var(--mint);border:1px solid rgba(31,209,160,0.3);}
+.pill.gd{background:rgba(240,180,41,0.12);color:var(--gold);border:1px solid rgba(240,180,41,0.3);}
+.pill.rd{background:rgba(240,100,73,0.12);color:var(--coral);border:1px solid rgba(240,100,73,0.3);}
+.note{background:rgba(31,209,160,0.07);border-left:3px solid var(--mint);border-radius:0 10px 10px 0;padding:11px 15px;}
+.note.gd{background:rgba(240,180,41,0.07);border-left-color:var(--gold);}
+.note.rd{background:rgba(240,100,73,0.07);border-left-color:var(--coral);}
+.note.bl{background:rgba(59,158,232,0.07);border-left-color:var(--blue);}
+.note p{font-size:13px;line-height:1.65;}
+.team-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;text-align:center;}
+.t-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--mint));display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;}
+.t-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3;}
+.t-role{font-size:12px;color:var(--blue);font-weight:500;margin-bottom:3px;}
+.t-slides{font-size:11px;color:var(--muted);}
+.ebar{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ebar-name{font-size:12px;color:rgba(232,240,250,0.8);width:145px;flex-shrink:0;text-align:right;}
+.ebar-wrap{flex:1;height:20px;background:rgba(59,158,232,0.1);border-radius:4px;overflow:hidden;}
+.ebar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:white;transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%;}
+.ebar-fill.hi{background:linear-gradient(90deg,#F06449,#f0a040);}
+.ebar-fill.md{background:linear-gradient(90deg,#F0B429,#c89020);}
+.ebar-fill.lo{background:linear-gradient(90deg,#1FD1A0,#159a74);}
+.ebar-val{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--muted);width:38px;flex-shrink:0;}
+.inv-hdr,.inv-row{display:grid;grid-template-columns:1.5fr 0.8fr 1fr 1fr 0.65fr 0.65fr;gap:0;padding:8px 12px;font-size:13px;align-items:center;}
+.inv-hdr{background:rgba(59,158,232,0.15);color:var(--blue);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-radius:8px 8px 0 0;}
+.inv-row{border-bottom:1px solid rgba(59,158,232,0.07);color:rgba(232,240,250,0.85);}
+.inv-row:nth-child(even){background:rgba(59,158,232,0.04);}
+#nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:10px;
+  background:rgba(7,17,31,0.94);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:40px;padding:8px 16px;}
+#nav button{background:none;border:none;cursor:pointer;color:var(--blue);font-size:16px;padding:4px 7px;border-radius:7px;transition:background .2s;font-family:'IBM Plex Sans',sans-serif;}
+#nav button:hover{background:rgba(59,158,232,0.15);}
+#nav button:disabled{color:var(--muted);cursor:default;}#nav button:disabled:hover{background:none;}
+.dots{display:flex;gap:5px;align-items:center;}
+.dot-btn{width:6px;height:6px;border-radius:50%;background:rgba(59,158,232,0.25);border:none;cursor:pointer;transition:all .25s;padding:0;}
+.dot-btn.active{background:var(--blue);width:18px;border-radius:3px;}
+#slide-counter{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);min-width:40px;text-align:center;}
+#timer{position:fixed;top:16px;left:16px;z-index:100;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);
+  background:rgba(7,17,31,0.9);border:1px solid var(--border);border-radius:9px;padding:6px 13px;cursor:pointer;}
+#timer.warn{color:var(--gold);border-color:rgba(240,180,41,0.35);}#timer.danger{color:var(--coral);border-color:rgba(240,100,73,0.35);}
+#notes-btn{position:fixed;top:16px;right:16px;z-index:100;background:rgba(7,17,31,0.9);border:1px solid var(--border);
+  border-radius:9px;padding:6px 13px;color:var(--muted);font-size:12px;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:all .2s;}
+#notes-btn:hover{color:var(--blue);border-color:var(--blue);}
+#notes-panel{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:99;width:min(800px,94vw);max-height:190px;overflow-y:auto;
+  background:rgba(7,17,31,0.97);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:none;}
+#notes-panel.show{display:block;}
+#notes-panel h4{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:7px;}
+#notes-panel p{font-size:13px;color:rgba(232,240,250,0.82);line-height:1.65;}
+#progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--blue),var(--mint));transition:width .4s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.slide.active .fa{animation:fu .5s ease forwards;}
+.slide.active .fa:nth-child(1){animation-delay:.04s;}
+.slide.active .fa:nth-child(2){animation-delay:.1s;opacity:0;}
+.slide.active .fa:nth-child(3){animation-delay:.17s;opacity:0;}
+.slide.active .fa:nth-child(4){animation-delay:.24s;opacity:0;}
+.slide.active .fa:nth-child(5){animation-delay:.31s;opacity:0;}
+.slide.active .fa:nth-child(6){animation-delay:.38s;opacity:0;}
+.slide.active .fa:nth-child(7){animation-delay:.45s;opacity:0;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div id="progress"></div>
+<div id="timer" onclick="toggleTimer()" title="Click to start/stop">⏱ 0:00</div>
+<button id="notes-btn" onclick="toggleNotes()">📋 Speaker script</button>
+<div id="notes-panel"><h4>Speaker script — slide <span id="snote-num">1</span></h4><p id="notes-text"></p></div>
+<div id="deck">
+
+<!-- S0 TITLE -->
+<div class="slide active" id="s0">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <div class="fa" style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
+      <span class="pill bl">Operations &amp; Decisions</span>
+      <span class="pill gn">Prof. Yacine Rekik</span>
+      <span class="pill gd">15-minute pitch</span>
+    </div>
+    <h1 class="fa">Smarter Retail<br><em>Through Data.</em></h1>
+    <p class="lead fa" style="max-width:600px;margin-top:16px;margin-bottom:30px;">Two years of daily sales data. 20 top fresh produce products. Three questions that directly affect store profitability.</p>
+    <div class="g3 fa" style="max-width:680px;">
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-size:24px;margin-bottom:8px;">📈</div>
+        <h3 style="font-size:14px;">Demand Forecasting</h3>
+        <p style="font-size:13px;">Can we predict tomorrow's sales accurately enough to make ordering decisions?</p>
+      </div>
+      <div class="card c-gold" style="padding:16px 18px;">
+        <div style="font-size:24px;margin-bottom:8px;">💰</div>
+        <h3 style="font-size:14px;color:var(--gold);">Price &amp; Promotions</h3>
+        <p style="font-size:13px;">Does changing the price affect how many units customers buy?</p>
+      </div>
+      <div class="card c-mint" style="padding:16px 18px;">
+        <div style="font-size:24px;margin-bottom:8px;">📦</div>
+        <h3 style="font-size:14px;color:var(--mint);">Stock Policy</h3>
+        <p style="font-size:13px;">How much stock to hold to avoid stockouts without wasting perishables?</p>
+      </div>
+    </div>
+    <p class="fa" style="margin-top:22px;font-size:12px;color:var(--muted);">→ Arrow keys or navigation bar below</p>
+  </div>
+</div>
+
+<!-- S1 TEAM -->
+<div class="slide" id="s1">
+  <div class="slide-label fa">The team</div>
+  <h2 class="fa">Meet the <em>presenters</em></h2>
+  <p class="fa" style="margin-bottom:18px;">Six team members — each owns a specific section of the story.</p>
+  <div class="g3 fa" style="gap:12px;margin-bottom:12px;">
+    <div class="team-card"><div class="t-av">👩‍💻</div><div class="t-name">Elizabeth Korobka</div><div class="t-role">Data Prep &amp; EDA</div><div class="t-slides">Slides 3 – 4</div></div>
+    <div class="team-card" style="border-color:rgba(31,209,160,0.3);"><div class="t-av" style="background:linear-gradient(135deg,var(--mint),var(--blue));">👨‍💻</div><div class="t-name">Ashkan Abbasianhosseini</div><div class="t-role">Demand Forecasting</div><div class="t-slides">Slides 5 – 6</div></div>
+    <div class="team-card" style="border-color:rgba(240,180,41,0.3);"><div class="t-av" style="background:linear-gradient(135deg,var(--gold),var(--coral));">👨‍💼</div><div class="t-name">Dmytro Darmobytiuk</div><div class="t-role">Price Elasticity</div><div class="t-slides">Slides 7 – 8</div></div>
+  </div>
+  <div class="g3 fa" style="gap:12px;">
+    <div class="team-card" style="border-color:rgba(240,100,73,0.3);"><div class="t-av" style="background:linear-gradient(135deg,var(--coral),#f0a040);">👩‍🔬</div><div class="t-name">Nadiia Cherniavska</div><div class="t-role">Inventory Policy</div><div class="t-slides">Slides 9 – 10</div></div>
+    <div class="team-card"><div class="t-av">👩‍🎓</div><div class="t-name">Romina Molina</div><div class="t-role">Conclusions &amp; Limitations</div><div class="t-slides">Slide 11</div></div>
+    <div class="team-card" style="border-color:rgba(31,209,160,0.3);"><div class="t-av" style="background:linear-gradient(135deg,var(--mint),#1baaff);">👩‍💻</div><div class="t-name">Yuliia Hushcha</div><div class="t-role">Opening &amp; Q&amp;A</div><div class="t-slides">Slides 1 &amp; 12</div></div>
+  </div>
+</div>
+
+<!-- S2 DATA -->
+<div class="slide" id="s2">
+  <div class="slide-label fa">Elizabeth · Data preparation</div>
+  <h2 class="fa">From <em>204,135 raw rows</em> to a clean working dataset.</h2>
+  <div class="g2 fa" style="margin-top:14px;align-items:start;">
+    <div class="col">
+      <div class="g2" style="gap:12px;">
+        <div class="card" style="padding:16px;text-align:center;"><div class="stat"><span class="num" style="font-size:34px;">71K</span><div class="lbl">clean records</div><div class="sub">after dedup &amp; inactive filter</div></div></div>
+        <div class="card c-gold" style="padding:16px;text-align:center;"><div class="stat"><span class="num gd" style="font-size:34px;">20</span><div class="lbl">top products</div><div class="sub">highest-volume SKUs</div></div></div>
+        <div class="card" style="padding:16px;text-align:center;"><div class="stat"><span class="num mn" style="font-size:34px;">2 yrs</span><div class="lbl">observation window</div><div class="sub">Dec 2017 → Dec 2019</div></div></div>
+        <div class="card" style="padding:16px;text-align:center;"><div class="stat"><span class="num" style="font-size:34px;">700+</span><div class="lbl">days per product</div><div class="sub">enough for reliable models</div></div></div>
+      </div>
+      <div class="note"><p><strong>Why top 20?</strong> They represent the bulk of revenue and each has 700+ daily observations — the minimum for seasonal models to be reliable.</p></div>
+      <div class="note gd"><p><strong>All products are fresh vegetables</strong> — perishability is a real operational constraint that affects how we interpret the inventory results.</p></div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:10px;">Top 10 products by total volume</h3>
+      <table class="tbl">
+        <thead><tr><th>Product</th><th style="text-align:right;">Total units</th><th style="text-align:right;">Avg / day</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>🥒 Cucumber</td><td style="text-align:right;" class="win">286,368</td><td style="text-align:right;">392.8</td></tr>
+          <tr><td>🥕 Carrots</td><td style="text-align:right;">114,519</td><td style="text-align:right;">157.1</td></tr>
+          <tr><td>🍆 Aubergine</td><td style="text-align:right;">113,238</td><td style="text-align:right;">155.3</td></tr>
+          <tr><td>🌱 Spring Onions</td><td style="text-align:right;">104,555</td><td style="text-align:right;">143.4</td></tr>
+          <tr><td>🍅 Baby Plum Tomatoes</td><td style="text-align:right;">101,253</td><td style="text-align:right;">139.1</td></tr>
+          <tr><td>🫑 Mixed Peppers</td><td style="text-align:right;">97,822</td><td style="text-align:right;">203.8</td></tr>
+          <tr><td>🥬 Iceberg Lettuce</td><td style="text-align:right;">95,477</td><td style="text-align:right;">130.9</td></tr>
+          <tr><td>🥦 Broccoli</td><td style="text-align:right;">94,661</td><td style="text-align:right;">129.9</td></tr>
+          <tr><td>🌿 Fresh Spinach</td><td style="text-align:right;">82,793</td><td style="text-align:right;">169.8</td></tr>
+          <tr><td>🧅 Onions</td><td style="text-align:right;">79,206</td><td style="text-align:right;">108.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- S3 EDA -->
+<div class="slide" id="s3">
+  <div class="slide-label fa">Elizabeth · Exploratory analysis</div>
+  <h2 class="fa">Demand follows a clear <em>weekly rhythm.</em></h2>
+  <div class="g2 fa" style="margin-top:14px;flex:1;min-height:0;">
+    <div class="col">
+      <div class="card" style="flex:1;padding:16px 18px;">
+        <h3>Average sales by day of week</h3>
+        <div style="height:195px;position:relative;"><canvas id="weekChart"></canvas></div>
+      </div>
+      <div class="note"><p><strong>Key insight:</strong> Wednesday and Thursday consistently peak. Weekends dip by ~25%. Any model that ignores this weekly cycle will make systematic errors every week.</p></div>
+    </div>
+    <div class="col">
+      <div class="card" style="flex:1;padding:16px 18px;">
+        <h3>Monthly demand trend</h3>
+        <div style="height:195px;position:relative;"><canvas id="monthChart"></canvas></div>
+      </div>
+      <div class="note gd"><p><strong>Seasonal pattern:</strong> Summer (Jul–Aug) peaks, winter dips. This annual cycle is important context — models trained in winter will initially underestimate summer demand.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 FORECASTING METHODS -->
+<div class="slide" id="s4">
+  <div class="slide-label fa">Ashkan · Demand forecasting</div>
+  <h2 class="fa">We tested <em>three models.</em> Here is how they work.</h2>
+  <div class="g3 fa" style="margin-top:14px;margin-bottom:12px;">
+    <div class="card" style="padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span class="pill gn">Model 1</span><h3 style="margin:0;font-size:14px;">Moving Average (MA-7)</h3></div>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>What it does:</strong> Predicts tomorrow = average of the past 7 days. Dead simple.</p>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>Strength:</strong> Fast, no overfitting, naturally captures weekly cycles.</p>
+      <p style="font-size:13px;"><strong>Weakness:</strong> Ignores trends. If demand is rising it always lags.</p>
+    </div>
+    <div class="card c-gold" style="padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span class="pill gd">Model 2</span><h3 style="margin:0;font-size:14px;color:var(--gold);">Holt-Winters</h3></div>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>What it does:</strong> Decomposes the series into level, trend, and weekly seasonality. Updates all three at every observation.</p>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>Strength:</strong> Handles trending + seasonal data well in theory.</p>
+      <p style="font-size:13px;"><strong>Weakness:</strong> On high-variance products it overfits and adapts slowly.</p>
+    </div>
+    <div class="card c-mint" style="padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span class="pill bl">Model 3</span><h3 style="margin:0;font-size:14px;color:var(--mint);">SARIMA(1,1,1)(1,1,1,7)</h3></div>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>What it does:</strong> Full statistical time series model — captures trend, seasonality, and autocorrelation (how today's sales depend on yesterday's).</p>
+      <p style="font-size:13px;margin-bottom:8px;"><strong>Strength:</strong> Most flexible and powerful of the three.</p>
+      <p style="font-size:13px;"><strong>Weakness:</strong> Slower to fit; can overfit on noisy data.</p>
+    </div>
+  </div>
+  <div class="card fa" style="padding:14px 18px;background:rgba(59,158,232,0.07);border-color:rgba(59,158,232,0.25);">
+    <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;">
+        <h3 style="font-size:14px;margin-bottom:4px;">How we evaluated them — 80/20 time-based split</h3>
+        <p style="font-size:13px;">Train on the first 80% of dates (~583 days). Test on the remaining 20% (~146 days). Models never see future data. Accuracy = <strong>MAE</strong> (Mean Absolute Error) in units — lower is better.</p>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--blue);">~583 days</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Training window</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--mint);">~146 days</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Test window</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 FORECAST RESULTS -->
+<div class="slide" id="s5">
+  <div class="slide-label fa">Ashkan · Forecasting results</div>
+  <h2 class="fa">The <em>simplest model wins</em> — and that makes sense.</h2>
+  <div class="g2 fa" style="margin-top:12px;align-items:start;">
+    <div class="col">
+      <table class="tbl">
+        <thead><tr><th>Model</th><th style="text-align:right;">Mean MAE</th><th style="text-align:right;">Median MAE</th><th style="text-align:right;">Won on</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td><span class="pill gn">MA-7</span></td><td style="text-align:right;" class="win">37.9 units</td><td style="text-align:right;" class="win">33.0 units</td><td style="text-align:right;" class="win">12 / 20</td></tr>
+          <tr><td><span class="pill bl">SARIMA</span></td><td style="text-align:right;" class="ok">45.2 units</td><td style="text-align:right;" class="ok">34.3 units</td><td style="text-align:right;" class="ok">7 / 20</td></tr>
+          <tr><td><span class="pill gd">Holt-Winters</span></td><td style="text-align:right;" class="bad">63.7 units</td><td style="text-align:right;" class="bad">54.1 units</td><td style="text-align:right;" class="bad">1 / 20</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><p><strong>Why MA-7 wins:</strong> Fresh produce is bought out of habit. Demand is driven by stable weekly cycles — not complex long-term trends. A 7-day average captures that perfectly without overfitting.</p></div>
+      <div class="note gd"><p><strong>Where HW failed most:</strong> Spring Onions (MAE 202), Loose Red Pepper (MAE 177), Cucumber (MAE 133) — high-volume, high-variance products punish slow adaptation.</p></div>
+      <div class="note bl"><p><strong>SARIMA was competitive</strong> on 7 calmer products — Family Pack Tomatoes (MAE 17.4), Mixed Peppers (MAE 21.2). Worth considering for low-variance SKUs.</p></div>
+    </div>
+    <div class="card" style="padding:16px 18px;">
+      <h3>MAE — all 20 products</h3>
+      <div style="height:300px;position:relative;"><canvas id="maeChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 PRICE -->
+<div class="slide" id="s6">
+  <div class="slide-label fa">Dmytro · Price analysis</div>
+  <h2 class="fa">Higher price = fewer sales.<br><em>But the sensitivity varies a lot.</em></h2>
+  <div class="g2 fa" style="margin-top:12px;align-items:start;">
+    <div class="col">
+      <div class="card" style="padding:16px 20px;">
+        <h3>Portfolio-level elasticity (β)</h3>
+        <div style="display:flex;align-items:baseline;gap:10px;margin:8px 0;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:48px;font-weight:600;color:var(--coral);">-0.40</span>
+          <span style="font-size:13px;color:var(--muted);">overall β</span>
+        </div>
+        <p style="font-size:13px;"><strong>1% price increase → 0.40% demand drop.</strong> Statistically significant (p &lt; 0.0001).</p>
+      </div>
+      <div class="note gd"><p><strong>Price-inelastic overall:</strong> The store has pricing power across the portfolio. Customers keep buying even if prices nudge up slightly.</p></div>
+      <div class="note rd"><p><strong>7 elastic products (β &lt; -1):</strong> Org. Cucumber, Loose Red Pepper, Aubergine, Broccoli, Snack Cucumbers, Cherry Tomatoes, Cucumber. Raising their prices risks a large volume drop.</p></div>
+      <div class="note"><p><strong>3 inelastic products (β &gt; -0.65):</strong> Carrots (-0.65), Iceberg Lettuce (-0.61), Romaine Hearts (-0.38). Safe to test a small price increase — customers won't notice.</p></div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:10px;">Elasticity by product — all 20</h3>
+      <div id="elas-chart">
+        <div class="ebar"><span class="ebar-name">Organic Cucumber</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="100%"></div></div><span class="ebar-val">-2.44</span></div>
+        <div class="ebar"><span class="ebar-name">Loose Red Pepper</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="90%"></div></div><span class="ebar-val">-2.20</span></div>
+        <div class="ebar"><span class="ebar-name">Aubergine</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="82%"></div></div><span class="ebar-val">-2.01</span></div>
+        <div class="ebar"><span class="ebar-name">Broccoli</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="79%"></div></div><span class="ebar-val">-1.93</span></div>
+        <div class="ebar"><span class="ebar-name">Snack Cucumbers</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="62%"></div></div><span class="ebar-val">-1.51</span></div>
+        <div class="ebar"><span class="ebar-name">Cherry Tomatoes</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="61%"></div></div><span class="ebar-val">-1.50</span></div>
+        <div class="ebar"><span class="ebar-name">Cucumber</span><div class="ebar-wrap"><div class="ebar-fill hi" data-w="60%"></div></div><span class="ebar-val">-1.48</span></div>
+        <div class="ebar"><span class="ebar-name">Mushrooms</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="57%"></div></div><span class="ebar-val">-1.39</span></div>
+        <div class="ebar"><span class="ebar-name">Spring Onions</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="55%"></div></div><span class="ebar-val">-1.34</span></div>
+        <div class="ebar"><span class="ebar-name">Garlic</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="52%"></div></div><span class="ebar-val">-1.28</span></div>
+        <div class="ebar"><span class="ebar-name">Fam. Pack Tom.</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="39%"></div></div><span class="ebar-val">-0.94</span></div>
+        <div class="ebar"><span class="ebar-name">Fresh Spinach</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="39%"></div></div><span class="ebar-val">-0.96</span></div>
+        <div class="ebar"><span class="ebar-name">Wild Rocket</span><div class="ebar-wrap"><div class="ebar-fill md" data-w="38%"></div></div><span class="ebar-val">-0.93</span></div>
+        <div class="ebar"><span class="ebar-name">Baby Plum Tom.</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="33%"></div></div><span class="ebar-val">-0.82</span></div>
+        <div class="ebar"><span class="ebar-name">Onions</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="32%"></div></div><span class="ebar-val">-0.78</span></div>
+        <div class="ebar"><span class="ebar-name">Carrots</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="27%"></div></div><span class="ebar-val">-0.65</span></div>
+        <div class="ebar"><span class="ebar-name">Red Onions</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="25%"></div></div><span class="ebar-val">-0.62</span></div>
+        <div class="ebar"><span class="ebar-name">Iceberg Lettuce</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="25%"></div></div><span class="ebar-val">-0.61</span></div>
+        <div class="ebar"><span class="ebar-name">Mixed Peppers</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="20%"></div></div><span class="ebar-val">-0.50</span></div>
+        <div class="ebar"><span class="ebar-name">Romaine Hearts</span><div class="ebar-wrap"><div class="ebar-fill lo" data-w="15%"></div></div><span class="ebar-val">-0.38</span></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--coral);">● β &lt; -1 elastic</span>
+        <span style="font-size:11px;color:var(--gold);">● β -0.5→-1 moderate</span>
+        <span style="font-size:11px;color:var(--mint);">● β &gt; -0.5 inelastic</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 PROMOTIONS -->
+<div class="slide" id="s7">
+  <div class="slide-label fa">Dmytro · Promotions</div>
+  <h2 class="fa">A data quality finding: <em>zero promotions recorded.</em></h2>
+  <div class="g2 fa" style="margin-top:14px;align-items:start;">
+    <div class="col">
+      <div class="card c-coral" style="padding:22px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:10px;">⚠️</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--coral);margin-bottom:8px;">DISCOUNT = 0</div>
+        <p style="font-size:14px;">For every product, across all 700+ days. The promotion flag was never activated.</p>
+      </div>
+      <div class="note rd"><p><strong>Not a modelling failure.</strong> We caught it, investigated it, and are reporting it. Either no promotions ran in this period, or the POS system is not capturing the discount flag.</p></div>
+      <div class="note gd"><p><strong>Action item:</strong> Ask the store's data team whether the DISCOUNT column is being populated. If promotions are run but not recorded, the data pipeline has a gap that affects all future analysis.</p></div>
+    </div>
+    <div class="col">
+      <h3 style="margin-bottom:10px;">What elasticity tells us instead</h3>
+      <p style="font-size:14px;margin-bottom:12px;">Since we can't measure promotional lift directly, price elasticity serves as a proxy — it tells us which products would respond most strongly to a discount.</p>
+      <div class="card" style="padding:16px 18px;margin-bottom:0;">
+        <h3 style="color:var(--coral);">Best candidates for a promotion</h3>
+        <p style="font-size:13px;">High-elasticity products: <strong>Organic Cucumber (-2.44), Loose Red Pepper (-2.20), Aubergine (-2.01).</strong> A 10% price cut could boost volume by 20%+ based on the elasticity coefficient.</p>
+      </div>
+      <div class="card c-mint" style="padding:16px 18px;">
+        <h3 style="color:var(--mint);">Avoid discounting these</h3>
+        <p style="font-size:13px;">Low-elasticity products: <strong>Carrots, Iceberg Lettuce, Romaine Hearts.</strong> Discounting them generates minimal extra volume — you just give away margin.</p>
+      </div>
+      <div class="card" style="padding:16px 18px;">
+        <h3>Causal caveat</h3>
+        <p style="font-size:13px;">Elasticity estimates are correlational. Seasonality, weekday effects, and competitor pricing are not fully controlled. A proper A/B pricing test would give cleaner causal estimates.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 INVENTORY TABLE -->
+<div class="slide" id="s8">
+  <div class="slide-label fa">Nadiia · Inventory policy</div>
+  <h2 class="fa">When to reorder: <em>product-by-product numbers.</em></h2>
+  <div class="g3 fa" style="margin-bottom:12px;gap:12px;">
+    <div class="card" style="padding:14px 16px;text-align:center;"><div class="stat"><span class="num" style="font-size:36px;">L = 2</span><div class="lbl">days lead time</div><div class="sub">assumed delivery window</div></div></div>
+    <div class="card c-gold" style="padding:14px 16px;text-align:center;"><div class="stat"><span class="num gd" style="font-size:36px;">90%</span><div class="lbl">base service level</div><div class="sub">in stock 9 out of 10 days</div></div></div>
+    <div class="card c-mint" style="padding:14px 16px;text-align:center;"><div class="stat"><span class="num mn" style="font-size:36px;">+81</span><div class="lbl">avg extra units for 95%</div><div class="sub">cost of higher service level</div></div></div>
+  </div>
+  <div class="fa">
+    <div class="inv-hdr"><span>Product</span><span>Avg/day</span><span>Reorder @ 90%</span><span>Reorder @ 95%</span><span>SS 90%</span><span>SS 95%</span></div>
+    <div class="inv-row"><span>🥒 Cucumber</span><span>392.8</span><span class="win">1,052.9</span><span>1,155.6</span><span>267.2</span><span>370.0</span></div>
+    <div class="inv-row"><span>🥕 Carrots</span><span>157.1</span><span class="win">385.9</span><span>432.6</span><span>71.7</span><span>118.5</span></div>
+    <div class="inv-row"><span>🍆 Aubergine</span><span>155.3</span><span class="win">460.2</span><span>710.0</span><span>149.4</span><span class="bad">399.2</span></div>
+    <div class="inv-row"><span>🌱 Spring Onions</span><span>143.4</span><span class="win">448.8</span><span>587.9</span><span>161.9</span><span class="ok">301.0</span></div>
+    <div class="inv-row"><span>🍅 Baby Plum Tom.</span><span>139.1</span><span class="win">372.0</span><span>405.0</span><span>93.8</span><span>126.8</span></div>
+    <div class="inv-row"><span>🫑 Mixed Peppers</span><span>203.8</span><span class="win">505.6</span><span>535.2</span><span>97.8</span><span>127.4</span></div>
+    <div class="inv-row"><span>🥬 Iceberg Lettuce</span><span>130.9</span><span class="win">362.6</span><span>399.0</span><span>100.9</span><span>137.3</span></div>
+    <div class="inv-row"><span>🥦 Broccoli</span><span>129.9</span><span class="win">363.0</span><span>418.6</span><span>103.4</span><span>159.1</span></div>
+    <div class="inv-row"><span>🥒 Snack Cucumbers</span><span>121.9</span><span class="win">312.0</span><span>350.3</span><span>68.1</span><span>106.4</span></div>
+    <div class="inv-row"><span>🌿 Fresh Spinach</span><span>169.8</span><span class="win">500.3</span><span>582.1</span><span>160.7</span><span>242.5</span></div>
+  </div>
+  <p class="fa" style="font-size:11px;color:var(--muted);margin-top:6px;">R = Reorder Point. SS = Safety Stock. Empirical percentile method + normal approximation cross-check (z = 1.282 / 1.645).</p>
+</div>
+
+<!-- S9 INVENTORY CHART -->
+<div class="slide" id="s9">
+  <div class="slide-label fa">Nadiia · Inventory trade-off</div>
+  <h2 class="fa">90% vs 95%: <em>is the extra stock worth it?</em></h2>
+  <div class="g2 fa" style="margin-top:14px;flex:1;min-height:0;align-items:start;">
+    <div class="card" style="padding:16px 18px;">
+      <h3>Reorder points — top 10 products</h3>
+      <div style="height:285px;position:relative;"><canvas id="invChart"></canvas></div>
+    </div>
+    <div class="col">
+      <div class="card" style="padding:16px 18px;">
+        <h3>The trade-off</h3>
+        <p style="font-size:14px;line-height:1.7;">Going from <strong style="color:var(--blue);">90%</strong> to <strong style="color:var(--mint);">95%</strong> costs on average <strong style="color:var(--gold);">81 extra units</strong> per product. For perishables, those may spoil. The decision: is the cost of a stockout greater than the cost of holding and wasting 81 units?</p>
+      </div>
+      <div class="note rd"><p><strong>Aubergine outlier:</strong> 95% safety stock = 399 units vs 149 at 90%. Very high demand variance makes the 95% level extremely costly for this specific product.</p></div>
+      <div class="note"><p><strong>Shelf life caveat:</strong> The shelf life columns in the dataset were empty. Reorder points should be capped at daily demand × shelf life days. For our high-volume products, the reorder points represent 2–5 days of stock — within typical fresh produce windows — but this should be verified.</p></div>
+      <div class="note gd"><p><strong>Recommendation:</strong> Implement the 90% reorder points now. Review quarterly as seasonal demand patterns shift.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- S10 CONCLUSIONS -->
+<div class="slide" id="s10">
+  <div class="slide-label fa">Romina · Conclusions</div>
+  <h2 class="fa">Three questions. <em>Three actionable answers.</em></h2>
+  <div class="g3 fa" style="margin-top:14px;margin-bottom:14px;">
+    <div class="card" style="padding:18px 20px;">
+      <div style="font-size:28px;margin-bottom:8px;">📈</div>
+      <h3 style="font-size:15px;">Use MA-7 for daily ordering</h3>
+      <p style="font-size:13px;line-height:1.65;margin-bottom:10px;">Outperforms Holt-Winters and SARIMA on 12 of 20 products. Mean MAE of 37.9 units. Simple, transparent, and deployable today.</p>
+      <span class="pill gn">Ready to deploy</span>
+    </div>
+    <div class="card c-gold" style="padding:18px 20px;">
+      <div style="font-size:28px;margin-bottom:8px;">💰</div>
+      <h3 style="font-size:15px;color:var(--gold);">Selective price increases</h3>
+      <p style="font-size:13px;line-height:1.65;margin-bottom:10px;">Raise prices on Carrots (β=-0.65), Iceberg Lettuce (β=-0.61), Romaine Hearts (β=-0.38). Keep stable on Aubergine, Org. Cucumber, Broccoli.</p>
+      <span class="pill gd">Margin opportunity</span>
+    </div>
+    <div class="card c-mint" style="padding:18px 20px;">
+      <div style="font-size:28px;margin-bottom:8px;">📦</div>
+      <h3 style="font-size:15px;color:var(--mint);">Set reorder points at 90%</h3>
+      <p style="font-size:13px;line-height:1.65;margin-bottom:10px;">All 10 product reorder points ready to implement. The 95% level costs 81 extra units on average — only justified if stockout costs are high.</p>
+      <span class="pill bl">Implementation-ready</span>
+    </div>
+  </div>
+  <div class="card fa" style="padding:16px 20px;">
+    <h3 style="margin-bottom:10px;">Limitations we are honest about</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+      <div><span class="pill rd" style="margin-bottom:6px;display:inline-block;">Data gap</span><p style="font-size:13px;line-height:1.6;margin-top:4px;">No promotion data recorded. DISCOUNT = 0 for all products across 2 years. Needs investigation with the data team.</p></div>
+      <div><span class="pill gd" style="margin-bottom:6px;display:inline-block;">Causality</span><p style="font-size:13px;line-height:1.6;margin-top:4px;">Price-demand is correlational. Seasonality and competitor pricing not fully controlled. A/B test needed for causal estimates.</p></div>
+      <div><span class="pill bl" style="margin-bottom:6px;display:inline-block;">Shelf life</span><p style="font-size:13px;line-height:1.6;margin-top:4px;">Shelf life columns were empty. Reorder policy should be capped by perishability constraints once data is available.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- S11 CLOSE -->
+<div class="slide" id="s11">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+    <span class="pill bl fa" style="font-size:12px;padding:5px 16px;margin-bottom:20px;">Operations &amp; Decisions · Prof. Yacine Rekik</span>
+    <h1 class="fa" style="margin-bottom:14px;">Thank you.<br><em>Questions?</em></h1>
+    <p class="lead fa" style="max-width:520px;margin-bottom:30px;">We're happy to go deeper on any section — forecasting methodology, specific elasticity results, or inventory calculations. The full runnable notebook is available.</p>
+    <div class="g3 fa" style="gap:22px;max-width:560px;margin-bottom:28px;">
+      <div><div style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:var(--mint);">MA-7</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Best forecast model<br>12/20 products won</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:var(--coral);">-0.40</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Portfolio price β<br>inelastic overall</div></div>
+      <div><div style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:var(--blue);">90%</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Recommended SL<br>+81 units for 95%</div></div>
+    </div>
+    <div class="fa" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:660px;">
+      <span class="pill bl" style="padding:5px 12px;font-size:12px;">Elizabeth Korobka</span>
+      <span class="pill gn" style="padding:5px 12px;font-size:12px;">Ashkan Abbasianhosseini</span>
+      <span class="pill gd" style="padding:5px 12px;font-size:12px;">Dmytro Darmobytiuk</span>
+      <span class="pill rd" style="padding:5px 12px;font-size:12px;">Nadiia Cherniavska</span>
+      <span class="pill bl" style="padding:5px 12px;font-size:12px;">Romina Molina</span>
+      <span class="pill gn" style="padding:5px 12px;font-size:12px;">Yuliia Hushcha</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+<div id="nav">
+  <button id="btn-prev" onclick="go(-1)" disabled>←</button>
+  <div class="dots" id="dots"></div>
+  <span id="slide-counter">1 / 12</span>
+  <button id="btn-next" onclick="go(1)">→</button>
+</div>
+
+<script>
+const NOTES=[
+`YULIIA opens: "Good morning / afternoon Professor Rekik and everyone. My name is Yuliia and I'm presenting with my team today. We analysed two full years of daily sales data from a single retail store, focusing on the 20 best-selling fresh produce products. We had three questions. Can we forecast demand accurately enough to make ordering decisions? Does price affect how many units customers buy? And how much stock should we hold to avoid running out without wasting perishable goods? I will hand over to Elizabeth to walk you through how we prepared the data." [~1 min]`,
+
+`YULIIA introduces team: "Before we start — here is our team. Elizabeth prepared the data and led the exploratory analysis. Ashkan built and evaluated the three forecasting models. Dmytro ran the price and promotion analysis. Nadiia designed the inventory policy. Romina delivers our conclusions. And I will lead the Q&A at the end. Let's get started — Elizabeth." [~40 sec]`,
+
+`ELIZABETH: "We started with over 200,000 raw transaction records from a single store. After cleaning — removing inactive products with status not equal to 8, deduplicating same-day entries for the same product, and removing the few rows with negative sales figures which represent returns — we were left with 71,474 clean records. We then narrowed our focus to the 20 best-selling products by total volume, giving us 13,928 daily product-day observations. Why the top 20? Two reasons. First, they represent the majority of store revenue. Second, each product has over 700 daily observations — and that's the minimum you need for seasonal time series models to produce reliable estimates. All 20 products are fresh vegetables, which is important context for the inventory section because perishability creates a real operational constraint. The date range is December 2017 to December 2019 — two full years." [~1.5 min]`,
+
+`ELIZABETH: "Before we model anything, we explored the data visually. Two patterns are immediately clear. First, there is a consistent weekly cycle. Demand peaks on Wednesday and Thursday — around 15 to 20 percent above the weekly average — and drops on weekends, particularly Sunday which is the lowest day. Any forecasting model that ignores this weekly cycle will systematically under-predict mid-week and over-predict weekends. Second, there is a seasonal trend. Demand rises through spring and summer, peaking in July and August, then falls back in winter. This is relevant context when interpreting model accuracy — models trained in winter will initially lag on summer demand. I will now hand over to Ashkan who will explain how we built the forecasting models." [~1.5 min]`,
+
+`ASHKAN: "Thank you Elizabeth. My section is demand forecasting. We tested three models. The first is a 7-day moving average — the simplest possible approach. It predicts tomorrow's demand as the average of the last 7 days. Nothing fancy, but hard to overfit and naturally captures weekly rhythms. The second is Holt-Winters — a statistical method that separately tracks the level, the trend, and the weekly seasonal component, updating all three at every new observation. The third is SARIMA — a Seasonal ARIMA model that also captures autocorrelation, meaning how today's demand is correlated with yesterday's and the day before. To evaluate all three fairly, we used a time-based train-test split. We trained on the first 80 percent of data — roughly 583 days — and tested on the remaining 20 percent — roughly 146 days. This is critical: the models never see future data. Our accuracy metric is MAE, Mean Absolute Error, which tells us on average how many units off each forecast is. Lower is better." [~2 min]`,
+
+`ASHKAN: "Here are the results. The winner is the Moving Average — the simplest model — on 12 out of 20 products, with a mean MAE of 37.9 units. SARIMA comes second at 45.2. Holt-Winters performs worst at 63.7 on average. Why does the simplest model win? Because fresh produce demand is habitual and weekly. People buy cucumbers on Wednesdays. A 7-day window captures that cycle perfectly without any risk of overfitting. Holt-Winters struggled most on high-volume, high-variance products — Spring Onions had an MAE of 202 units, Cucumber of 133, Loose Red Pepper of 177. The model adapted too slowly to their demand swings. SARIMA was actually competitive on calmer products — Family Pack Tomatoes scored 17.4, Mixed Peppers 21.2. So if you want granular accuracy on specific low-variance products, SARIMA is worth keeping. But for a single daily ordering rule across the full range? Use the moving average. It's transparent, fast, and works." [~2 min]`,
+
+`DMYTRO: "Thank you Ashkan. My section is price. We wanted to know: if the store raises the price of a product, how much does demand fall? We used a standard econometric technique called log-log regression. It gives us a coefficient called beta — the price elasticity of demand. If beta is below minus one, the product is price-elastic — a 1 percent price increase causes more than a 1 percent drop in demand. If beta is between zero and minus one, the product is price-inelastic — customers keep buying even if the price rises. Looking at the portfolio as a whole, beta is minus 0.40. A 1 percent price increase leads to a 0.40 percent demand drop on average. This is statistically significant with a p-value below 0.0001. The overall portfolio is price-inelastic — the store has genuine pricing power. But the picture varies enormously by product. You can see on the right that Organic Cucumber has a beta of minus 2.44 — extremely sensitive. Romaine Hearts has minus 0.38 — almost no sensitivity. I'll let that chart sink in and then move to the promotion finding." [~2 min]`,
+
+`DMYTRO: "Now the promotion analysis. I need to tell you something that surprised us when we first found it. Every single row in the DISCOUNT column is zero. Across all 20 products, across all 700 days of data — not a single promotional event was recorded. This means we cannot measure promotional uplift, because there is no variation in the discount flag to analyse. This is not a modelling failure — it is a data quality finding. Either the store genuinely ran zero promotions during this two-year period, or the point-of-sale system is not recording the discount flag correctly. We would recommend the store's data team to investigate. In the meantime, we used price elasticity as a proxy. The logic is: products with high elasticity would respond most strongly to a promotional discount. Organic Cucumber at minus 2.44, Loose Red Pepper at minus 2.20, and Aubergine at minus 2.01 are the best candidates for a promotion — a 10 percent price cut could generate 20 percent or more volume uplift based on the elasticity. Avoid discounting Carrots, Lettuce, and Romaine — you'd just give away margin with minimal volume gain. I'll hand over to Nadiia for the inventory section." [~1.5 min]`,
+
+`NADIIA: "Thank you Dmytro. My section is inventory. The question is: when should the store trigger a new order, and how much stock does it need to hold? We designed a reorder-point policy from historical demand. The logic is simple. We assumed it takes 2 days for a new delivery to arrive — the lead time. We then calculated the distribution of demand during those 2 days for each product. The reorder point is set at the percentile of that 2-day demand distribution that matches your target service level. At the 90th percentile, you'll have stock available 90 percent of the time — in stock 9 out of 10 days. At the 95th percentile, 95 percent. The extra units you hold above the average 2-day demand is called safety stock. Look at Cucumber as an example. It sells 392.8 units per day on average. At the 90 percent service level, you reorder when stock hits 1,052.9 units — that's about 2.7 days of cover. Safety stock is 267 units. At 95 percent, reorder at 1,155.6 units, safety stock 370 units. We have these numbers for all 10 products in the table." [~2 min]`,
+
+`NADIIA: "The natural follow-up question is: should we go to 95 percent or stick with 90 percent? Moving from 90 to 95 costs an average of 81 extra units per product in safety stock. For most products that's manageable. But Aubergine is the outlier — the 95 percent safety stock is 399 units versus only 149 at 90 percent. That's because Aubergine has very high demand variance — some days it sells much more or much less than average, and the 95th percentile sits far from the mean. For a perishable product, holding 250 extra units that may not sell is a real waste cost. One important caveat I want to flag. The dataset had two shelf life columns — KDRESTLAUFZEIT and LGRESTLAUFZEIT, which are German for customer remaining shelf life and warehouse remaining shelf life. But both columns were empty for all products. In principle, the reorder point should be capped at daily demand times shelf life in days — you never want to order more than you can sell before it expires. For our high-volume products, the reorder points correspond to roughly 2 to 5 days of stock, which is likely within safe windows for fresh vegetables. But this should be confirmed with real shelf life data. Our recommendation is to implement the 90 percent reorder points now and review quarterly as demand patterns shift with the seasons." [~1.5 min]`,
+
+`ROMINA: "Thank you Nadiia. Let me bring it all together. We came in with three questions and we have three answers. For demand forecasting: use the 7-day moving average for daily ordering decisions. It outperformed more complex models on 12 of 20 products with a mean MAE of 37.9 units. It's transparent, fast, and works today. For price: selectively raise prices on Carrots, Iceberg Lettuce, and Romaine Hearts — these have very low price sensitivity, so customers will barely notice. Keep prices stable on Aubergine, Organic Cucumber, and Broccoli where demand is highly elastic. For stock: the 90 percent reorder points we've provided are ready to implement. Only consider moving to 95 percent if stockout costs — lost sales plus customer dissatisfaction — exceed the cost of holding and potentially wasting 81 extra units per product. We want to be honest about three limitations. First, we have no promotion data — the DISCOUNT column appears to be unpopulated. Second, our price findings are correlational, not causal — a controlled experiment would give cleaner results. Third, the shelf life constraint was not verifiable from this dataset, and the inventory policy should be updated once that data becomes available. Thank you." [~1.5 min]`,
+
+`YULIIA closes: "Thank you Romina and thank you to the whole team. That's our presentation. We'd love to take questions — on any section. [Pause.] If asked about the promotion finding: 'We confirmed programmatically that the DISCOUNT column is 0 for every single row. It appears to be a data recording issue. Whether promotions were actually run during this period we cannot confirm from the data alone.' If asked about shelf life: 'The columns KDRESTLAUFZEIT and LGRESTLAUFZEIT exist in the raw dataset but were empty. For our top-20 high-volume products, the reorder points are in the range of 2 to 5 days of cover, which is likely within safe limits — but this needs verification.' If asked why MA-7 beats SARIMA: 'Fresh produce demand is habitual and weekly, not autocorrelated in a complex way. The weekly window of 7 days captures the dominant signal. SARIMA's additional complexity adds more variance than it removes bias.' The full notebook is available if you'd like to see the code or any specific chart." [Remaining time for Q&A]`
+];
+
+const TOTAL=12;
+let cur=0,timerOn=false,timerSec=0,timerIv=null;
+let built={eda:false,mae:false,inv:false,elas:false};
+
+function go(dir){
+  document.querySelectorAll('.slide')[cur].classList.remove('active');
+  cur=Math.max(0,Math.min(TOTAL-1,cur+dir));
+  document.querySelectorAll('.slide')[cur].classList.add('active');
+  upd();
+  if(cur===3)bEDA();
+  if(cur===5)bMAE();
+  if(cur===6)bElas();
+  if(cur===9)bInv();
+}
+
+function upd(){
+  document.getElementById('btn-prev').disabled=cur===0;
+  document.getElementById('btn-next').disabled=cur===TOTAL-1;
+  document.getElementById('slide-counter').textContent=`${cur+1} / ${TOTAL}`;
+  document.getElementById('snote-num').textContent=cur+1;
+  document.getElementById('notes-text').textContent=NOTES[cur];
+  document.getElementById('progress').style.width=`${((cur+1)/TOTAL)*100}%`;
+  document.querySelectorAll('.dot-btn').forEach((d,i)=>d.classList.toggle('active',i===cur));
+}
+
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++){const d=document.createElement('button');d.className='dot-btn'+(i===0?' active':'');d.onclick=()=>go(i-cur);dotsEl.appendChild(d);}
+upd();
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+
+function toggleTimer(){
+  if(timerOn){clearInterval(timerIv);timerOn=false;}
+  else{timerIv=setInterval(()=>{timerSec++;const m=Math.floor(timerSec/60),s=String(timerSec%60).padStart(2,'0');const el=document.getElementById('timer');el.textContent=`⏱ ${m}:${s}`;el.className=timerSec>840?'danger':timerSec>720?'warn':'';},1000);timerOn=true;}
+}
+function toggleNotes(){document.getElementById('notes-panel').classList.toggle('show');}
+
+function bElas(){
+  if(built.elas)return;built.elas=true;
+  document.querySelectorAll('#elas-chart .ebar-fill').forEach(b=>{setTimeout(()=>{b.style.width=b.dataset.w;},200);});
+}
+
+Chart.defaults.color='rgba(232,240,250,0.62)';
+Chart.defaults.borderColor='rgba(59,158,232,0.12)';
+Chart.defaults.font.family="'IBM Plex Sans',sans-serif";
+Chart.defaults.font.size=12;
+
+function bEDA(){
+  if(built.eda)return;built.eda=true;
+  new Chart(document.getElementById('weekChart'),{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Avg daily sales',data:[148,155,168,172,162,144,128],backgroundColor:['rgba(59,158,232,0.55)','rgba(59,158,232,0.65)','rgba(31,209,160,0.82)','rgba(31,209,160,0.82)','rgba(59,158,232,0.65)','rgba(59,158,232,0.45)','rgba(59,158,232,0.32)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{title:{display:true,text:'Avg units/day'},grid:{color:'rgba(59,158,232,0.08)'}}}}});
+  new Chart(document.getElementById('monthChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg daily sales',data:[138,133,144,150,156,162,170,174,163,153,143,136],borderColor:'rgba(31,209,160,0.9)',backgroundColor:'rgba(31,209,160,0.1)',fill:true,tension:0.4,pointBackgroundColor:'rgba(31,209,160,1)',pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{title:{display:true,text:'Avg units/day'},grid:{color:'rgba(59,158,232,0.08)'}}}}});
+}
+
+function bMAE(){
+  if(built.mae)return;built.mae=true;
+  new Chart(document.getElementById('maeChart'),{type:'bar',data:{labels:['Fam Pk Tom','Onions','Cherry Tom','Wild Rocket','Mix Pepper','Garlic','Mushrooms','Org Cuc','Snack Cuc','Aubergine','Spinach','Ice Lettuce','Romaine','Baby Plum','Red Onions','Broccoli','Carrots','Cucumber','Red Pepper','Spring On'],datasets:[{label:'MA-7',data:[20.7,21.7,22.7,22.4,36.4,29.0,29.6,25.4,37.0,55.9,38.6,29.0,20.0,39.0,28.4,40.2,40.6,93.9,62.2,65.0],backgroundColor:'rgba(31,209,160,0.72)',borderRadius:3},{label:'Holt-Winters',data:[20.6,23.4,24.5,25.5,27.5,29.9,32.5,36.0,38.6,53.9,54.3,54.6,57.2,63.4,65.2,72.9,79.5,133.5,177.9,202.8],backgroundColor:'rgba(240,180,41,0.52)',borderRadius:3},{label:'SARIMA',data:[17.4,22.7,26.5,30.6,21.2,36.1,28.7,39.2,56.7,61.7,38.2,28.9,27.1,56.8,29.1,78.1,32.5,85.6,87.1,99.5],backgroundColor:'rgba(59,158,232,0.62)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{ticks:{font:{size:10},maxRotation:40},grid:{display:false}},y:{title:{display:true,text:'MAE (units)'},grid:{color:'rgba(59,158,232,0.08)'}}}}});
+}
+
+function bInv(){
+  if(built.inv)return;built.inv=true;
+  new Chart(document.getElementById('invChart'),{type:'bar',data:{labels:['Cucumber','Carrots','Aubergine','Spring On.','Baby Plum','Mix Pepper','Ice Lettuce','Broccoli','Snack Cuc','Spinach'],datasets:[{label:'Avg lead demand',data:[785.6,314.2,310.6,286.8,278.2,407.6,261.8,259.8,243.8,339.6],backgroundColor:'rgba(59,158,232,0.48)',borderRadius:3},{label:'Reorder @ 90%',data:[1052.9,385.9,460.2,448.8,372.0,505.6,362.6,363.0,312.0,500.3],backgroundColor:'rgba(31,209,160,0.7)',borderRadius:3},{label:'Reorder @ 95%',data:[1155.6,432.6,710.0,587.9,405.0,535.2,399.0,418.6,350.3,582.1],backgroundColor:'rgba(240,180,41,0.6)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14,font:{size:12}}}},scales:{x:{ticks:{font:{size:11},maxRotation:35},grid:{display:false}},y:{title:{display:true,text:'Units'},grid:{color:'rgba(59,158,232,0.08)'}}}}});
+}
+
+document.getElementById('notes-text').textContent=NOTES[0];
+</script>
+</body>
+</html>
